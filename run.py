@@ -19,18 +19,18 @@ logging.basicConfig(filename='log.txt',level=logging.DEBUG,
 def main():
 	# Initialization
 	starttime = time.time()
-	files     = ["doc%01d.txt" % r for r in range(1,6)]
+	files     = ["doc%01d.txt" % r for r in range(1,4)]
 	docparser = DocumentParser()
 	senparser = SentenceParser()
 
 	# Parse the input files into lists of sentences and words
 	# And use TF-IDF score to rank each word in a document
 	logging.debug('Parsing Documents Into Sentences')
-	sentences = []
-	doclength = []
-	fdict     = {}
-	tfdict    = {}
-	fidict    = {}
+	sentences = []  # list containing all sentences in documents
+	doclength = []  # list containing number of sentences in documents
+	fdict     = {}  # dictionary for tokenized words in documents
+	tfdict    = {}  # dictionary for tfidf-scored (top) words in documents
+	fidict    = {}  # dictionary for overlapped words in all documents
 
 	for num_f,f in enumerate(files):
 		logging.debug('Loop Over Document [ {} ]'.format(f))
@@ -57,12 +57,12 @@ def main():
 	topkeys = topDict(fidict, top=topnumber)
 
 	# Output the corresponding Document and Sentence Info
-	ftable={}
-	doclength.insert(0,0) #insert 0 at the beginning of doclength list
+	ftable={}  # dictionary for hastag table
+	doclength.insert(0,0)
 	for tkey in topkeys:
 		ftable[tkey] = {}
 		#ftable[tkey]['score']= np.mean(fidict[tkey])
-		ftable[tkey]['doc']  = np.unique(fdict[tkey]['docid']).tolist()
+		ftable[tkey]['doc']  = [ files[i] for i in np.unique(fdict[tkey]['docid']).tolist() ]
 
 		for inum,ituple in enumerate(zip(fdict[tkey]['sentenceid'],fdict[tkey]['docid'])):
 			senindex=ituple[0]+reduce((lambda x,y: x+y),doclength[:(ituple[1]+1)])
